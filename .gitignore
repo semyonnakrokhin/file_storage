@@ -1,0 +1,24 @@
+# PyCharm
+.idea/
+*.iml
+*.iws
+*.iws.iml
+*.ipr
+
+# Virtual Environment
+**/*venv*/
+**/*Venv*/
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Environment
+.env
+.test.env
+*.env*
+
+# Logs
+logs/*
