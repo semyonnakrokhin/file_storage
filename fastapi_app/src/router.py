@@ -3,7 +3,6 @@ from typing import List, Optional
 
 from fastapi import APIRouter, File, Query, Response, UploadFile, status
 from fastapi.responses import JSONResponse
-from starlette.responses import FileResponse
 
 from fastapi_app.src.schemas import FileGetResponse, FileUploadResponse, Message
 
@@ -23,6 +22,7 @@ async def create_update_file_handler(
     #     await out_file.write(content)
 
     content = await file.read()
+    # content = (1, 2, 3)
 
     payload = {
         "id": file_id or 1,
@@ -92,10 +92,10 @@ async def delete_files_handler(
 async def download_file_handler(
     file_id: int,
 ):
-    if not file_id:
+    if file_id < 0:
         return JSONResponse(
             status_code=status.HTTP_404_NOT_FOUND,
             content=Message(message="The file does not exist").dict(),
         )
 
-    return FileResponse()
+    return Message(message="OK")
