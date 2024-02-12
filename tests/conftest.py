@@ -5,16 +5,20 @@ import pytest
 from httpx import AsyncClient
 
 from fastapi_app.src.config import DatabaseSettings
-from fastapi_app.src.database import Database
 from fastapi_app.src.main import app
 
 
-@pytest.fixture(scope="session", autouse=True)
-async def setup_db():
-    settings_test = DatabaseSettings()
-    database_test = Database(db_url=settings_test.dsn)
-    assert settings_test.mode == "TEST"
+@pytest.fixture(scope="session")
+def container():
+    container = app.container
+    return container
 
+
+@pytest.fixture(scope="session", autouse=True)
+async def setup_db(container):
+    assert DatabaseSettings().mode == "TEST"
+
+    database_test = container.database.database_provider()
     await database_test.delete_and_create_database()
 
 

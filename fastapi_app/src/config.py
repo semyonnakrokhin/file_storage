@@ -1,6 +1,10 @@
 import os
+from pprint import pprint
+from typing import Dict
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+from fastapi_app.logging_config import LOGGING_CONFIG
 
 _root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), os.path.pardir))
 
@@ -31,6 +35,25 @@ class DatabaseSettings(BaseSettings):
         )
 
 
+def merge_dicts(*dicts: Dict) -> Dict:
+    merged = {}
+    for d in dicts:
+        for key, value in d.items():
+            if (
+                key in merged
+                and isinstance(merged[key], dict)
+                and isinstance(value, dict)
+            ):
+                merged[key] = merge_dicts(merged[key], value)
+            else:
+                merged[key] = value
+    return merged
+
+
 if __name__ == "__main__":
-    settings = DatabaseSettings()
-    print(settings.dsn)
+    db_settings = DatabaseSettings()
+    log_settings_dict = LOGGING_CONFIG
+    settings_dict = merge_dicts(
+        {"database": db_settings.model_dump()}, {"logging": log_settings_dict}
+    )
+    pprint(settings_dict)
