@@ -9,25 +9,29 @@ from fastapi_app.src.main import app
 
 
 @pytest.fixture(scope="session")
-def container():
-    container = app.container
-    return container
-
-
-@pytest.fixture(scope="session", autouse=True)
-async def setup_db(container):
-    assert DatabaseSettings().mode == "TEST"
-
-    database_test = container.database.database_provider()
-    await database_test.delete_and_create_database()
-
-
-@pytest.fixture(scope="session")
 def event_loop(request):
     """Create an instance of the default event loop for each test case."""
     loop = asyncio.get_event_loop_policy().new_event_loop()
     yield loop
     loop.close()
+
+
+@pytest.fixture(scope="session")
+def container():
+    container = app.container
+    return container
+
+
+@pytest.fixture(scope="session")
+def database_test(container):
+    return container.database.database_provider()
+
+
+@pytest.fixture(scope="session", autouse=True)
+async def setup_db(database_test):
+    assert DatabaseSettings().mode == "TEST"
+
+    await database_test.delete_and_create_database()
 
 
 @pytest.fixture(scope="session")

@@ -1,39 +1,22 @@
 from datetime import datetime
 from typing import List, Optional
 
-from fastapi import APIRouter, File, Query, Response, UploadFile, status
+from fastapi import APIRouter, Depends, File, Query, Response, UploadFile, status
 from fastapi.responses import JSONResponse
 
-from fastapi_app.src.schemas import FileGetResponse, FileUploadResponse, Message
+from fastapi_app.src.dependencies import file_service, valid_file_metadata
+from fastapi_app.src.schemas import FileMetadataDto, Message
 
 router = APIRouter(prefix="/v1", tags=["file_storage"])
 
 
 @router.post("/api/upload", status_code=status.HTTP_201_CREATED)
 async def create_update_file_handler(
-    file_id: int,
-    name: str | None = None,
-    tag: str | None = None,
+    file_metadata: FileMetadataDto = Depends(valid_file_metadata),
     file: UploadFile = File(...),
 ):
-    # file_path = os.path.join(out_file_path, f"{file.filename}")
-    # async with aiofiles.open(file_path, 'wb') as out_file:
-    #     content = await file.read()
-    #     await out_file.write(content)
-
-    content = await file.read()
-    # content = (1, 2, 3)
-
-    payload = {
-        "id": file_id or 1,
-        "name": name or file_id,
-        "tag": tag,
-        "size": len(content),
-        "mimeType": file.content_type,
-        "modificationTime": datetime.utcnow().isoformat(),
-    }
-
-    return FileUploadResponse(**payload)
+    file_metadata_saved = await file_service(file_metadata=file_metadata, file=file)
+    return file_metadata_saved
 
 
 @router.get("/api/get", status_code=status.HTTP_200_OK)
@@ -51,9 +34,10 @@ async def get_files_info_handler(
         "tag": "Hello World!",
         "size": 500,
         "mimeType": "img",
-        "modificationTime": datetime.utcnow().isoformat(),
+        "modificationTime": datetime.utcnow(),
     }
-    return FileGetResponse(**payload)
+    print(payload["modificationTime"].tzinfo)
+    return FileMetadataDto(**payload)
 
 
 @router.delete(
