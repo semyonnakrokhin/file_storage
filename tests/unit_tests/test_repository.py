@@ -10,16 +10,16 @@ from fastapi_app.src.db_service.exceptions import (
     SessionNotSetError,
 )
 from fastapi_app.src.db_service.repositories import OrmAlchemyRepository
-from fastapi_app.src.schemas import FileMetadataDto
+from fastapi_app.src.schemas import FileMetadata
 
 
 @pytest.mark.usefixtures("empty_database")
 class TestRepositoryInsertOne:
-    file_metadata_1 = FileMetadataDto(
+    file_metadata_1 = FileMetadata(
         id=1, name="file1.txt", tag=None, size=1024, mimeType="text/plain"
     )
 
-    file_metadata_2 = FileMetadataDto(
+    file_metadata_2 = FileMetadata(
         id=2,
         name="file2.docx",
         tag="important",
@@ -28,7 +28,7 @@ class TestRepositoryInsertOne:
         modificationTime=datetime.utcnow(),
     )
 
-    file_metadata_3 = FileMetadataDto(
+    file_metadata_3 = FileMetadata(
         id=3,
         name="3",
         tag=None,
@@ -37,7 +37,7 @@ class TestRepositoryInsertOne:
         modificationTime=None,
     )
 
-    file_metadata_4 = FileMetadataDto(
+    file_metadata_4 = FileMetadata(
         id=4,
         name="file4.pdf",
         tag=None,
@@ -46,16 +46,16 @@ class TestRepositoryInsertOne:
         modificationTime=datetime.utcnow(),
     )
 
-    file_metadata_5 = FileMetadataDto(
+    file_metadata_5 = FileMetadata(
         id=5, name="file5.pdf", size=1024, mimeType="image/jpeg", modificationTime=None
     )
 
     # Повторяющийся ключ id=6
-    file_metadata_6 = FileMetadataDto(
+    file_metadata_6 = FileMetadata(
         id=6, name="file6.pdf", size=1024, mimeType="image/jpeg", modificationTime=None
     )
     # Повторяющийся ключ id=6
-    file_metadata_6_double = FileMetadataDto(
+    file_metadata_6_double = FileMetadata(
         id=6,
         name="file6_double.pdf",
         size=1024,
@@ -167,12 +167,20 @@ class TestRepositoryInsertOne:
 
 @pytest.mark.usefixtures("database_with_data")
 class TestRepositoryUpdateOne:
-    new_file_metadata_1 = FileMetadataDto(
+    new_file_metadata_1 = FileMetadata(
         id=1, name="New_name.txt", tag="Add some tags", size=1024, mimeType="text/plain"
     )
 
-    new_file_metadata_2 = {
-        "id": 2,
+    new_file_metadata_2 = FileMetadata(
+        id=5,
+        name="New_name_5.txt",
+        tag="Add some tags",
+        size=1024,
+        mimeType="text/plain",
+    )
+
+    new_file_metadata_3 = {
+        "id": 3,
         "name": "new_doc_2.docx",
         "tag": "VERY_important",
         "size": 1024,
@@ -182,8 +190,9 @@ class TestRepositoryUpdateOne:
     @pytest.mark.parametrize(
         argnames="new_file_metadata, expectation",
         argvalues=[
-            (new_file_metadata_2, pytest.raises(AttributeError)),
             (new_file_metadata_1, does_not_raise()),
+            (new_file_metadata_2, pytest.raises(DatabaseError)),
+            (new_file_metadata_3, pytest.raises(AttributeError)),
         ],
     )
     async def test_update_one_new_data(
@@ -197,9 +206,8 @@ class TestRepositoryUpdateOne:
         with expectation:
             async with database_test.get_session_factory() as session:
                 repository.set_session(session)
-                await repository.select_one_by_id(id=new_file_metadata.id)
                 domain_output_new = await repository.update_one(
-                    new_data=new_file_metadata
+                    id=new_file_metadata.id, new_data=new_file_metadata
                 )
                 await session.commit()
                 repository.clear_session()
@@ -217,7 +225,7 @@ class TestRepositoryUpdateOne:
             # )
 
     async def test_update_one_session_set_error(self, container, database_test):
-        new_file_metadata = FileMetadataDto(
+        new_file_metadata = FileMetadata(
             id=4, name="New_name.pdf", tag="AAAAAAA", size=1024, mimeType="image/jpeg"
         )
 
@@ -228,7 +236,9 @@ class TestRepositoryUpdateOne:
 
         with pytest.raises(SessionNotSetError):
             async with database_test.get_session_factory() as session:
-                await repository.update_one(new_data=new_file_metadata)
+                await repository.update_one(
+                    id=new_file_metadata.id, new_data=new_file_metadata
+                )
                 await session.commit()
 
 
@@ -237,7 +247,7 @@ class TestRepositorySelectOne:
     @pytest.mark.parametrize(
         argnames="id, expectation",
         argvalues=[
-            (5, pytest.raises(DatabaseError)),
+            (5, does_not_raise()),
             (4, does_not_raise()),
             (3, does_not_raise()),
             (2, does_not_raise()),
@@ -253,7 +263,7 @@ class TestRepositorySelectOne:
         try:
             domain_output_expected = example_domains_entities["domains"][id - 1]
         except IndexError:
-            domain_output_expected = []
+            domain_output_expected = None
 
         with expectation:
             async with database_test.get_session_factory() as session:
@@ -262,11 +272,14 @@ class TestRepositorySelectOne:
                 await session.commit()
                 repository.clear_session()
 
-            assert domain_output.id == domain_output_expected.id
-            assert domain_output.name == domain_output_expected.name
-            assert domain_output.tag == domain_output_expected.tag
-            assert domain_output.size == domain_output_expected.size
-            assert domain_output.mimeType == domain_output_expected.mimeType
+            if domain_output_expected:
+                assert domain_output.id == domain_output_expected.id
+                assert domain_output.name == domain_output_expected.name
+                assert domain_output.tag == domain_output_expected.tag
+                assert domain_output.size == domain_output_expected.size
+                assert domain_output.mimeType == domain_output_expected.mimeType
+            else:
+                assert domain_output is None
 
     async def test_select_one_session_set_error(self, container, database_test):
         id = 2

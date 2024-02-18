@@ -20,7 +20,7 @@ class CustomModel(BaseModel):
     )
 
 
-class FileMetadataDto(CustomModel):
+class FileMetadata(CustomModel):
     id: int
     name: str
     tag: Optional[str] = None
@@ -29,23 +29,11 @@ class FileMetadataDto(CustomModel):
     modificationTime: Optional[datetime] = None
 
 
-class FileUploadResponse(CustomModel):
-    id: int
-    name: str
-    tag: Optional[str]
-    size: int
-    mimeType: str
-    modificationTime: Optional[datetime]
-
-
-class FileGetResponse(CustomModel):
-    id: int
-    name: str
-    tag: Optional[str]
-    size: int
-    mimeType: str
-    modificationTime: Optional[datetime]
-
-
 class Message(CustomModel):
     message: str
+
+
+if __name__ == "__main__":
+    payload = {"kkk": 10}
+
+    file_metadata = FileMetadata(**payload)

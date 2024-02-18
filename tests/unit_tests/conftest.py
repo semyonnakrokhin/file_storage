@@ -3,7 +3,7 @@ from typing import Dict
 import pytest
 from dependency_injector import containers
 
-from fastapi_app.src.schemas import FileMetadataDto
+from fastapi_app.src.schemas import FileMetadata
 
 
 @pytest.fixture(scope="function", autouse=False)
@@ -42,10 +42,8 @@ def example_domains_entities(container: containers.DeclarativeContainer) -> Dict
     ]
 
     d = {
-        "domains": [FileMetadataDto(**payload) for payload in payloads],
-        "entities": [
-            mapper.to_entity(FileMetadataDto(**payload)) for payload in payloads
-        ],
+        "domains": [FileMetadata(**payload) for payload in payloads],
+        "entities": [mapper.to_entity(FileMetadata(**payload)) for payload in payloads],
     }
 
     return d

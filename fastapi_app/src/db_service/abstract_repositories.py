@@ -10,7 +10,7 @@ class AbstractDatabaseRepository(ABC, Generic[D]):
         pass
 
     @abstractmethod
-    async def update_one(self, data: D) -> D:
+    async def update_one(self, id: int, new_data: D) -> D:
         pass
 
     @abstractmethod

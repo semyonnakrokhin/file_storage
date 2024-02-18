@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
-from typing import Generic
+from typing import Dict, Generic
 
-from fastapi_app.src.app_types import D, E
+from fastapi_app.src.app_types import D, E, M
 
 
 class AbstractDomainEntityMapper(ABC, Generic[D, E]):
@@ -33,4 +33,14 @@ class AbstractDomainEntityMapper(ABC, Generic[D, E]):
         Returns:
             D: The domain model object.
         """
+        pass
+
+
+class AbstractModelDictMapper(ABC, Generic[M]):
+    @abstractmethod
+    def to_dict(self, model_obj: M) -> Dict:
+        pass
+
+    @abstractmethod
+    def to_model(self, dict_obj: Dict) -> M:
         pass

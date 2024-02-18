@@ -14,7 +14,7 @@ from fastapi_app.src.db_service.exceptions import (
     NoConditionsError,
     SessionNotSetError,
 )
-from fastapi_app.src.schemas import FileMetadataDto
+from fastapi_app.src.schemas import FileMetadata
 
 logger = logging.getLogger("app.db_service.repositories")
 
@@ -68,27 +68,18 @@ class OrmAlchemyRepository(AbstractDatabaseRepository, Generic[E, D]):
 
         return domain
 
-    async def update_one(self, new_data: D) -> D:
+    async def update_one(self, id: int, new_data: D) -> D:
         self.__validate_session_is_set()
 
-        id_for_modification = new_data.id
-        old_data = await self.select_one_by_id(id=id_for_modification)
-
-        old_entity = self._mapper.to_entity(domain_obj=old_data)
         new_entity = self._mapper.to_entity(domain_obj=new_data)
 
-        old_entity_dict = old_entity.to_dict()
-        old_entity_dict.update(new_entity.to_dict())
-        modified_entity_dict = old_entity_dict
-
-        stmt = (
-            update(self.model)
-            .values(**modified_entity_dict)
-            .filter_by(id=id_for_modification)
-            .returning(self.model)
-        )
-
         try:
+            stmt = (
+                update(self.model)
+                .values(**new_entity.to_dict())
+                .filter_by(id=id)
+                .returning(self.model)
+            )
             result = await self._session.execute(stmt)
             entity_db = result.scalars().one()
         except Exception as e:
@@ -103,13 +94,13 @@ class OrmAlchemyRepository(AbstractDatabaseRepository, Generic[E, D]):
 
         return domain
 
-    async def select_one_by_id(self, id: int) -> D:
+    async def select_one_by_id(self, id: int) -> Optional[D]:
         self.__validate_session_is_set()
 
         query = select(self.model).filter_by(id=id)
         try:
             result = await self._session.execute(query)
-            entity_db = result.scalars().one()
+            entity_db = result.scalars().one_or_none()
         except Exception as e:
             error_message = (
                 f"An error occurred while selecting one file-metadata "
@@ -118,9 +109,7 @@ class OrmAlchemyRepository(AbstractDatabaseRepository, Generic[E, D]):
             logger.error(error_message)
             raise DatabaseError(error_message)
 
-        domain = self._mapper.to_domain(entity_obj=entity_db)
-
-        return domain
+        return self._mapper.to_domain(entity_obj=entity_db) if entity_db else None
 
     async def select_some_by_params(
         self,
@@ -203,5 +192,5 @@ class OrmAlchemyRepository(AbstractDatabaseRepository, Generic[E, D]):
         return and_(*and_items)
 
 
-class FileMetadataRepository(OrmAlchemyRepository[FileOrm, FileMetadataDto]):
+class FileMetadataRepository(OrmAlchemyRepository[FileOrm, FileMetadata]):
     model = FileOrm

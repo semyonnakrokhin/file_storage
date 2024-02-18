@@ -22,3 +22,16 @@ class NoConditionsError(RepositoryError):
 # Mappers Errors
 class MappingError(Exception):
     pass
+
+
+# Service Errors
+class ServiceError(Exception):
+    pass
+
+
+class DomainModelCreationError(ServiceError):
+    pass
+
+
+class DictConversionError(ServiceError):
+    pass

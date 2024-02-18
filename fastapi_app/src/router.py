@@ -5,14 +5,14 @@ from fastapi import APIRouter, Depends, File, Query, Response, UploadFile, statu
 from fastapi.responses import JSONResponse
 
 from fastapi_app.src.dependencies import file_service, valid_file_metadata
-from fastapi_app.src.schemas import FileMetadataDto, Message
+from fastapi_app.src.schemas import FileMetadata, Message
 
 router = APIRouter(prefix="/v1", tags=["file_storage"])
 
 
 @router.post("/api/upload", status_code=status.HTTP_201_CREATED)
 async def create_update_file_handler(
-    file_metadata: FileMetadataDto = Depends(valid_file_metadata),
+    file_metadata: FileMetadata = Depends(valid_file_metadata),
     file: UploadFile = File(...),
 ):
     file_metadata_saved = await file_service(file_metadata=file_metadata, file=file)
@@ -37,7 +37,7 @@ async def get_files_info_handler(
         "modificationTime": datetime.utcnow(),
     }
     print(payload["modificationTime"].tzinfo)
-    return FileMetadataDto(**payload)
+    return FileMetadata(**payload)
 
 
 @router.delete(
