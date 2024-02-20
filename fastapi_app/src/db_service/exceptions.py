@@ -25,13 +25,17 @@ class MappingError(Exception):
 
 
 # Service Errors
-class ServiceError(Exception):
+class DatabaseServiceError(Exception):
     pass
 
 
-class DomainModelCreationError(ServiceError):
+class DomainModelCreationError(DatabaseServiceError):
     pass
 
 
-class DictConversionError(ServiceError):
+class DictConversionError(DatabaseServiceError):
+    pass
+
+
+class DataLossError(DatabaseServiceError):
     pass

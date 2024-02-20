@@ -1,3 +1,4 @@
+import uvicorn
 from fastapi import FastAPI
 
 from fastapi_app.logging_config import LOGGING_CONFIG
@@ -16,6 +17,7 @@ def create_app() -> FastAPI:
     container = AppContainer()
     container.config.from_dict(settings_dict)
     container.core.init_resources()
+    container.wire(modules=["fastapi_app.src.router", "fastapi_app.src.dependencies"])
 
     app = FastAPI()
     app.container = container
@@ -24,3 +26,6 @@ def create_app() -> FastAPI:
 
 
 app = create_app()
+
+if __name__ == "__main__":
+    uvicorn.run(app, host="0.0.0.0", port=8000)

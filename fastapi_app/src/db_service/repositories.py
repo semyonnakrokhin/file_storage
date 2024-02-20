@@ -177,7 +177,9 @@ class OrmAlchemyRepository(AbstractDatabaseRepository, Generic[E, D]):
     def get_filter_expression(self, params: Dict[str, List]) -> BinaryExpression:
         and_items = []
 
-        for k, v_list in params.items():
+        params_wo_none = {k: v for k, v in params.items() if v is not None}
+
+        for k, v_list in params_wo_none.items():
             attr = getattr(self.model, k, None)
             if not attr:
                 error_message = (

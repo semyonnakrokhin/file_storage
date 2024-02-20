@@ -6,9 +6,10 @@ from sqlalchemy.ext.asyncio import async_sessionmaker
 from fastapi_app.src.db_service.abstract_mappers import AbstractModelDictMapper
 from fastapi_app.src.db_service.exceptions import (
     DatabaseError,
+    DatabaseServiceError,
+    DataLossError,
     MappingError,
     NoConditionsError,
-    ServiceError,
     SessionNotSetError,
 )
 from fastapi_app.src.db_service.repositories import OrmAlchemyRepository
@@ -43,7 +44,7 @@ class DatabaseService:
         except (SessionNotSetError, MappingError, DatabaseError, AttributeError) as e:
             raise e
         except Exception as e:
-            raise ServiceError(f"Unexpected database service error: {str(e)}")
+            raise DatabaseServiceError(f"Unexpected database service error: {str(e)}")
         finally:
             self._repository.clear_session()
 
@@ -64,7 +65,7 @@ class DatabaseService:
         except (SessionNotSetError, MappingError, DatabaseError, AttributeError) as e:
             raise e
         except Exception as e:
-            raise ServiceError(f"Unexpected database service error: {str(e)}")
+            raise DatabaseServiceError(f"Unexpected database service error: {str(e)}")
         finally:
             self._repository.clear_session()
 
@@ -85,7 +86,7 @@ class DatabaseService:
         except (SessionNotSetError, MappingError, DatabaseError, AttributeError) as e:
             raise e
         except Exception as e:
-            raise ServiceError(f"Unexpected database service error: {str(e)}")
+            raise DatabaseServiceError(f"Unexpected database service error: {str(e)}")
         finally:
             self._repository.clear_session()
 
@@ -107,15 +108,19 @@ class DatabaseService:
         except (SessionNotSetError, MappingError, DatabaseError, AttributeError) as e:
             raise e
         except Exception as e:
-            raise ServiceError(f"Unexpected database service error: {str(e)}")
+            raise DatabaseServiceError(f"Unexpected database service error: {str(e)}")
         finally:
             self._repository.clear_session()
 
     async def remove_file_metadata(self, params: Dict[str, List]) -> int:
+        if not any(params.values()):
+            raise DataLossError("Removing all file metadata would result in data loss")
+
         try:
             async with self._async_session_factory() as session:
                 self._repository.set_session(session)
                 ids_list = await self._repository.delete_some_by_params(params=params)
+                await session.commit()
 
             return len(ids_list)
 
@@ -128,6 +133,6 @@ class DatabaseService:
         ) as e:
             raise e
         except Exception as e:
-            raise ServiceError(f"Unexpected database service error: {str(e)}")
+            raise DatabaseServiceError(f"Unexpected database service error: {str(e)}")
         finally:
             self._repository.clear_session()

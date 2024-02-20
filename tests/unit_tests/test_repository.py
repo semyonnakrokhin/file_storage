@@ -302,6 +302,8 @@ class TestRepositorySelectSome:
         argvalues=[
             (
                 {
+                    "id": None,
+                    "name": None,
                     "tag": ["important"],
                 },
                 None,
@@ -311,7 +313,9 @@ class TestRepositorySelectSome:
             ),
             (
                 {
+                    "id": None,
                     "name": ["3", "file4.pdf"],
+                    "tag": None,
                 },
                 None,
                 None,
@@ -321,6 +325,8 @@ class TestRepositorySelectSome:
             (
                 {
                     "id": [1, 4],
+                    "name": None,
+                    "tag": None,
                 },
                 None,
                 None,
@@ -328,12 +334,14 @@ class TestRepositorySelectSome:
                 does_not_raise(),
             ),
             (
-                {"id": [1, 2], "tag": ["important"]},
+                {
+                    "id": [1, 2],
+                    "tag": ["important"],
+                    "name": None,
+                },
                 None,
                 None,
-                [
-                    2,
-                ],
+                [2],
                 does_not_raise(),
             ),
             (
@@ -344,15 +352,14 @@ class TestRepositorySelectSome:
                 },
                 None,
                 None,
-                [
-                    2,
-                ],
+                [2],
                 does_not_raise(),
             ),
             (
                 {
                     "id": [1, 2, 3, 4],
                     "tag": ["important", "presentations"],
+                    "name": None,
                 },
                 2,
                 None,
@@ -363,6 +370,7 @@ class TestRepositorySelectSome:
                 {
                     "id": [1, 2, 3, 4],
                     "tag": ["important", "presentations"],
+                    "name": None,
                 },
                 None,
                 1,
@@ -373,12 +381,11 @@ class TestRepositorySelectSome:
                 {
                     "id": [1, 2, 3, 4],
                     "tag": ["important", "presentations"],
+                    "name": None,
                 },
                 2,
                 2,
-                [
-                    4,
-                ],
+                [4],
                 does_not_raise(),
             ),
             (
@@ -396,12 +403,11 @@ class TestRepositorySelectSome:
                 {
                     "id": [1, 2, 3, "ddd"],
                     "tag": ["important", "presentations"],
+                    "name": None,
                 },
                 2,
                 2,
-                [
-                    4,
-                ],
+                [4],
                 pytest.raises(DatabaseError),
             ),
         ],
