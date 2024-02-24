@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Optional
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, field_validator
 from pytz import UTC
 
 
@@ -28,12 +28,19 @@ class FileMetadata(CustomModel):
     mimeType: str = None
     modificationTime: Optional[datetime] = None
 
+    @field_validator("id")
+    @classmethod
+    def id_must_be_positive(cls, v: int) -> int:
+        if v <= 0:
+            raise ValueError("ID must be greater than 0")
+        return v
+
 
 class Message(CustomModel):
     message: str
 
 
 if __name__ == "__main__":
-    payload = {"kkk": 10}
+    payload = {"id": -1, "name": "ddd"}
 
     file_metadata = FileMetadata(**payload)

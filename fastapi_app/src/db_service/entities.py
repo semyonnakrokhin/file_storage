@@ -1,7 +1,7 @@
 import datetime
 from typing import Optional
 
-from sqlalchemy import text
+from sqlalchemy import BigInteger, UniqueConstraint, text
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 # from fastapi_app.src.database import Base
@@ -17,11 +17,13 @@ class FileOrm(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str]
     tag: Mapped[Optional[str]]
-    size: Mapped[int]
+    size: Mapped[int] = mapped_column(BigInteger)
     mime_type: Mapped[str]
     modification_time: Mapped[datetime.datetime] = mapped_column(
         server_default=text("TIMEZONE('utc', now())"), onupdate=datetime.datetime.utcnow
     )
+
+    _table_args__ = (UniqueConstraint("name", "mime_type", name="uq_name_mimetype"),)
 
     def __str__(self):
         return (

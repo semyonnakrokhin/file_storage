@@ -1,11 +1,14 @@
 import asyncio
+import os
+import shutil
 from typing import AsyncGenerator, Dict
 
 import pytest
-from dependency_injector import containers
+from dependency_injector import containers, providers
 from httpx import AsyncClient
 
 from fastapi_app.src.config import DatabaseSettings
+from fastapi_app.src.file_storage.repositories import DiskRepository
 from fastapi_app.src.main import app
 from fastapi_app.src.schemas import FileMetadata
 
@@ -18,15 +21,38 @@ def event_loop(request):
     loop.close()
 
 
+@pytest.fixture(scope="session", autouse=False)
+def test_storage_dir():
+    temp_dir = os.path.join(os.path.dirname(__file__), "storage_test")
+
+    yield temp_dir
+
+    if os.path.exists(temp_dir):
+        shutil.rmtree(temp_dir)
+
+
 @pytest.fixture(scope="session")
-def container():
+def container(test_storage_dir):
     container = app.container
+
+    test_disk_repository_provider = providers.Factory(
+        DiskRepository, storage_dir=test_storage_dir
+    )
+
+    container.repositories.disk_repository_provider.override(
+        test_disk_repository_provider
+    )
     return container
 
 
 @pytest.fixture(scope="session")
 def database_test(container):
     return container.database.database_provider()
+
+
+@pytest.fixture(scope="session", autouse=False)
+def disk_repository_test(container):
+    return container.repositories.disk_repository_provider()
 
 
 @pytest.fixture(scope="session", autouse=True)

@@ -1,16 +1,8 @@
 import logging
-from typing import Dict
 
-from fastapi_app.src.db_service.abstract_mappers import (
-    AbstractDomainEntityMapper,
-    AbstractModelDictMapper,
-)
+from fastapi_app.src.db_service.abstract_mappers import AbstractDomainEntityMapper
 from fastapi_app.src.db_service.entities import FileOrm
-from fastapi_app.src.db_service.exceptions import (
-    DictConversionError,
-    DomainModelCreationError,
-    MappingError,
-)
+from fastapi_app.src.db_service.exceptions import MappingError
 from fastapi_app.src.schemas import FileMetadata
 
 logger = logging.getLogger("app.db_service.mappers")
@@ -51,27 +43,3 @@ class FileMetadataMapper(AbstractDomainEntityMapper[FileMetadata, FileOrm]):
             )
             logger.error(error_message)
             raise MappingError(error_message)
-
-
-class FileMetadataDictMapper(AbstractModelDictMapper[FileMetadata]):
-    def to_dict(self, model_obj: FileMetadata) -> Dict:
-        try:
-            return model_obj.model_dump()
-        except Exception as e:
-            error_message = (
-                f"Failed to convert model object to dictionary. " f"Error: {e}"
-            )
-            logger.error(error_message)
-            DictConversionError(error_message)
-
-    def to_model(self, dict_obj: Dict) -> FileMetadata:
-        try:
-            return FileMetadata(**dict_obj)
-        except Exception as e:
-            error_message = (
-                f"Failed to create or update "
-                f"file metadata "
-                f"with provided data: {dict_obj}. Error: {e}"
-            )
-            logger.error(error_message)
-            raise DomainModelCreationError(error_message)

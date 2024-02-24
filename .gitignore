@@ -14,6 +14,7 @@ __pycache__/
 *.pyc
 *.pyo
 *.pyd
+.pytest_cache
 
 # Environment
 .env
@@ -23,3 +24,9 @@ __pycache__/
 # Logs
 */logs/*
 !*/logs/.gitkeep
+
+# Storage
+*/storage/*
+!*/storage/.gitkeep
+*/storage_tets/*
+!*/storage_test/.gitkeep

@@ -29,13 +29,5 @@ class DatabaseServiceError(Exception):
     pass
 
 
-class DomainModelCreationError(DatabaseServiceError):
-    pass
-
-
-class DictConversionError(DatabaseServiceError):
-    pass
-
-
 class DataLossError(DatabaseServiceError):
     pass

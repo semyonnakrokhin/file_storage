@@ -1,16 +1,17 @@
 import logging.config
+import os
 
 from dependency_injector import containers, providers
 
 from fastapi_app.logging_config import LOGGING_CONFIG
 from fastapi_app.src.config import DatabaseSettings, merge_dicts
 from fastapi_app.src.database import Database
-from fastapi_app.src.db_service.mappers import (
-    FileMetadataDictMapper,
-    FileMetadataMapper,
-)
+from fastapi_app.src.db_service.mappers import FileMetadataMapper
 from fastapi_app.src.db_service.repositories import FileMetadataRepository
 from fastapi_app.src.db_service.services import DatabaseService
+from fastapi_app.src.file_storage.repositories import DiskRepository
+from fastapi_app.src.file_storage.services import FileStorageService
+from fastapi_app.src.manager import ServiceManager
 
 
 class CoreContainer(containers.DeclarativeContainer):
@@ -31,8 +32,6 @@ class DatabaseContainer(containers.DeclarativeContainer):
 class MapperContainer(containers.DeclarativeContainer):
     file_metadata_mapper_provider = providers.Factory(FileMetadataMapper)
 
-    file_metadata_dict_mapper_provider = providers.Factory(FileMetadataDictMapper)
-
 
 class RepositoryContainer(containers.DeclarativeContainer):
     mappers = providers.DependenciesContainer()
@@ -41,10 +40,13 @@ class RepositoryContainer(containers.DeclarativeContainer):
         FileMetadataRepository, mapper=mappers.file_metadata_mapper_provider
     )
 
+    disk_repository_provider = providers.Factory(
+        DiskRepository,
+        storage_dir=os.path.join(os.path.dirname(__file__), os.path.pardir, "storage"),
+    )
+
 
 class ServicesContainer(containers.DeclarativeContainer):
-    mappers = providers.DependenciesContainer()
-
     repositories = providers.DependenciesContainer()
 
     database = providers.DependenciesContainer()
@@ -52,8 +54,17 @@ class ServicesContainer(containers.DeclarativeContainer):
     database_service_provider = providers.Factory(
         DatabaseService,
         repository=repositories.file_metadata_repository_provider,
-        mapper=mappers.file_metadata_dict_mapper_provider,
         async_session_factory=database.database_provider.provided.get_session_factory,
+    )
+
+    file_storage_service_provider = providers.Factory(
+        FileStorageService, file_repository=repositories.disk_repository_provider
+    )
+
+    service_manager_provider = providers.Factory(
+        ServiceManager,
+        file_storage_service=file_storage_service_provider,
+        database_service=database_service_provider,
     )
 
 
@@ -69,7 +80,7 @@ class AppContainer(containers.DeclarativeContainer):
     repositories = providers.Container(RepositoryContainer, mappers=mappers)
 
     services = providers.Container(
-        ServicesContainer, mappers=mappers, repositories=repositories, database=database
+        ServicesContainer, repositories=repositories, database=database
     )
 
 

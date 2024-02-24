@@ -1,7 +1,10 @@
+import os
+
 import pytest
 from httpx import AsyncClient
 
 
+@pytest.mark.usefixtures("test_storage_dir")
 @pytest.mark.usefixtures("database_with_data")
 class TestCreateUpdateEndpoint:
     _url = "v1/api/upload"
@@ -14,7 +17,7 @@ class TestCreateUpdateEndpoint:
         ],
     )
     async def test_successful_file_add(
-        self, async_client: AsyncClient, file_id, name, tag, file
+        self, async_client: AsyncClient, file_id, name, tag, file, test_storage_dir
     ):
         response_empty = await async_client.get(
             url="v1/api/get",
@@ -47,6 +50,11 @@ class TestCreateUpdateEndpoint:
         assert data["name"] == name
         assert data["tag"] == tag
 
+        _, ext = os.path.splitext(file[0])
+        file_path_expected = os.path.join(test_storage_dir, name + ext)
+        assert os.path.exists(file_path_expected)
+        # os.remove(file_path_expected)
+
     @pytest.mark.parametrize(
         argnames="file_id, name, tag, file",
         argvalues=[
@@ -60,7 +68,7 @@ class TestCreateUpdateEndpoint:
         ],
     )
     async def test_successful_file_update(
-        self, async_client: AsyncClient, file_id, name, tag, file
+        self, async_client: AsyncClient, file_id, name, tag, file, test_storage_dir
     ):
         response_exist = await async_client.get(
             url="v1/api/get",
@@ -89,6 +97,11 @@ class TestCreateUpdateEndpoint:
         assert data["name"] == name
         assert data["tag"] == tag
 
+        _, ext = os.path.splitext(file[0])
+        file_path_expected = os.path.join(test_storage_dir, name + ext)
+        assert os.path.exists(file_path_expected)
+        # os.remove(file_path_expected)
+
     @pytest.mark.parametrize(
         argnames="file_id, name, tag, file",
         argvalues=[
@@ -112,6 +125,7 @@ class TestCreateUpdateEndpoint:
         assert response.status_code == 422
 
 
+@pytest.mark.usefixtures("test_storage_dir")
 @pytest.mark.usefixtures("database_with_data")
 class TestGetFilesInfoEndpoint:
     _url = "v1/api/get"
@@ -193,6 +207,7 @@ class TestGetFilesInfoEndpoint:
             assert data["id"] in result_ids
 
 
+@pytest.mark.usefixtures("test_storage_dir")
 @pytest.mark.usefixtures("database_with_data")
 class TestDeleteFilesEndpoint:
     _url = "v1/api/delete"
@@ -223,16 +238,29 @@ class TestDeleteFilesEndpoint:
         assert response.json() == {"message": "There are no parameters for deletion"}
 
 
+@pytest.mark.usefixtures("test_storage_dir")
+@pytest.mark.usefixtures("database_with_data")
 class TestDownloadFileEndpoint:
     _url = "v1/api/download"
 
-    async def test_successful_download_file(self, async_client: AsyncClient):
-        file_id = 1
+    async def test_successful_download_file(
+        self, async_client: AsyncClient, test_storage_dir
+    ):
+        response_post = await async_client.post(
+            url="v1/api/upload",
+            files={"file": ("test_delete.txt", b"New Hello, World!")},
+            params={"file_id": 1, "name": "test_delete"},
+        )
 
-        response = await async_client.get(url=self._url, params={"file_id": file_id})
+        data_post = response_post.json()
+        response = await async_client.get(
+            url=self._url, params={"file_id": data_post["id"]}
+        )
 
         assert response.status_code == 200
-        assert response.json() == {"message": "OK"}
+        assert "Custom-Message" in response.headers
+        assert response.headers["Custom-Message"] == "OK"
+        assert response.content == b"New Hello, World!"
 
     async def test_failed_download_file(self, async_client: AsyncClient):
         file_id = -1
