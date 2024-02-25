@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  fastapi_app:
+    build: ./fastapi_app
+    volumes:
+      - storage_volume:${APP_DIR}/storage
+    env_file:
+      - ./fastapi_app/.env
+      - ./fastapi_app/.env.test
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - semyon-network
+    command:
+      - sh
+      - -c
+      - |
+        alembic -c ${APP_DIR}/alembic.ini upgrade head
+        uvicorn fastapi_app.src.main:app --reload
+
+  db:
+    image: postgres:14.0-alpine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    env_file:
+      - ./.env.postgres
+    ports:
+      - 5433:5432
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-q", "-d", "storage_db", "-U", "storage_user" ]
+    networks:
+      - semyon-network
+
+volumes:
+  postgres_data:
+  storage_volume:
+networks:
+  semyon-network:
+    driver: bridge
