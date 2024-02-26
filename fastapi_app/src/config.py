@@ -37,7 +37,7 @@ class DatabaseSettings(BaseSettings):
 
 class RedisSettings(BaseSettings):
     model_config = SettingsConfigDict(
-        env_file=os.path.join(_root_dir, os.pardir, ".env.redis"), extra="allow"
+        env_file=os.path.join(_root_dir, ".env.redis"), extra="allow"
     )
 
     redis_host: str
