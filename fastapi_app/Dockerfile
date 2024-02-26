@@ -10,8 +10,8 @@ ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
 
-ENV ROOT_DIR=/home/my_project
-ENV APP_DIR=/home/my_project/fastapi_app
+ENV ROOT_DIR=/my_project
+ENV APP_DIR=/my_project/fastapi_app
 
 
 # create directory for the app user
