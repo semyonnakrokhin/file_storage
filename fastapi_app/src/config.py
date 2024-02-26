@@ -35,6 +35,24 @@ class DatabaseSettings(BaseSettings):
         )
 
 
+class RedisSettings(BaseSettings):
+    model_config = SettingsConfigDict(
+        env_file=os.path.join(_root_dir, os.pardir, ".env.redis"), extra="allow"
+    )
+
+    redis_host: str
+    redis_port: str
+    redis_db: str
+
+    def __init__(self, **data):
+        super().__init__(**data)
+        self.url = self.redis_url
+
+    @property
+    def redis_url(self) -> str:
+        return f"redis" f"://{self.redis_host}" f":{self.redis_port}/{self.redis_db}"
+
+
 def merge_dicts(*dicts: Dict) -> Dict:
     merged = {}
     for d in dicts:
@@ -56,4 +74,7 @@ if __name__ == "__main__":
     settings_dict = merge_dicts(
         {"database": db_settings.model_dump()}, {"logging": log_settings_dict}
     )
+
+    redis_settings = RedisSettings()
     pprint(settings_dict)
+    print(redis_settings.url)

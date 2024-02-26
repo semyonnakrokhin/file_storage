@@ -3,6 +3,7 @@ from typing import Dict, List, Optional
 from dependency_injector.wiring import Provide, inject
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
 from fastapi.responses import FileResponse, JSONResponse
+from fastapi_cache.decorator import cache
 
 from fastapi_app.src.db_service.exceptions import (
     DatabaseError,
@@ -70,6 +71,7 @@ async def create_update_file_handler(
 
 
 @router.get("/api/get", status_code=status.HTTP_200_OK)
+@cache(expire=60)
 @inject
 async def get_files_info_handler(
     params: Dict[str, List] = Depends(get_query_params),
