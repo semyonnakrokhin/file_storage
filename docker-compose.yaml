@@ -17,7 +17,7 @@ services:
       - ./fastapi_app/.env.redis
     volumes:
       - storage_volume:/my_project/fastapi_app/storage
-    depends_on: ["db", "cache", "redis-commander", "nginx"]
+    depends_on: ["db", "cache", "redis-commander"]
 #      db:
 #        condition: service_healthy
 #      cache:
