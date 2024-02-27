@@ -50,7 +50,7 @@ class RedisSettings(BaseSettings):
 
     @property
     def redis_url(self) -> str:
-        return f"redis" f"://{self.redis_host}" f":{self.redis_port}/{self.redis_db}"
+        return f"redis://{self.redis_host}:{self.redis_port}/{self.redis_db}"
 
 
 def merge_dicts(*dicts: Dict) -> Dict:
