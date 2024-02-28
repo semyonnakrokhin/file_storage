@@ -1,4 +1,4 @@
-[.env]
+[./fastapi_app/.env]
 MODE=DEV
 DB_HOST=localhost
 DB_PORT=5432
@@ -7,7 +7,7 @@ DB_PASS=qwerty
 DB_NAME=storage_db
 
 
-[.env.test]
+[./fastapi_app/.env.test]
 MODE=TEST
 DB_HOST=localhost
 DB_PORT=5432
@@ -16,7 +16,19 @@ DB_PASS=qwerty
 DB_NAME=storage_test_db
 
 
+[./fastapi_app/.env.redis]
+REDIS_HOST=cache
+REDIS_PORT=6379
+REDIS_DB=0
+
+
 [.env.postgres]
 POSTGRES_USER=storage_user
 POSTGRES_PASSWORD=qwerty
 POSTGRES_DB=storage_db
+
+
+[.env.postgres.test]
+POSTGRES_USER=storage_user
+POSTGRES_PASSWORD=qwerty
+POSTGRES_DB=storage_test_db
