@@ -1,7 +1,6 @@
 import logging
-import mimetypes
 import os
-from typing import Dict
+from typing import Dict, Optional
 
 import aiofiles
 from fastapi import UploadFile
@@ -33,14 +32,8 @@ class DiskRepository(AbstractFileRepository[FileMetadata]):
                 f"Failed to check storage directory existence: {str(e)}"
             )
 
-    def __get_file_path(self, domain_obj: FileMetadata) -> str:
-        name, mime_type = domain_obj.name, domain_obj.mimeType
-
-        extension = mimetypes.guess_extension(mime_type)
-        if not extension:
-            raise ValueError(f"No extension found for MIME type: '{mime_type}'")
-
-        target_filename = name + extension
+    def __get_file_path(self, domain_obj: FileMetadata) -> Optional[str]:
+        target_filename = domain_obj.name
         for filename in os.listdir(self._storage_dir):
             if filename == target_filename:
                 return os.path.join(self._storage_dir, filename)
@@ -56,8 +49,7 @@ class DiskRepository(AbstractFileRepository[FileMetadata]):
     async def write_file(self, file: UploadFile, domain_obj: FileMetadata) -> None:
         self.__validate_file_does_not_exist(domain_obj=domain_obj)
 
-        _, ext = os.path.splitext(file.filename)
-        file_path = os.path.join(self._storage_dir, domain_obj.name + ext)
+        file_path = os.path.join(self._storage_dir, domain_obj.name)
 
         try:
             async with aiofiles.open(file_path, "wb") as out_file:

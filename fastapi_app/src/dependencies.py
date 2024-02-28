@@ -1,3 +1,4 @@
+import os
 from typing import Dict, List, Optional
 
 from fastapi import File, Query, UploadFile
@@ -11,9 +12,10 @@ def valid_file_metadata(
     tag: Optional[str] = None,
     file: UploadFile = File(...),
 ) -> FileMetadata:
+    _, ext = os.path.splitext(file.filename)
     payload = {
         "id": file_id,
-        "name": name if name else str(file_id),
+        "name": (name if name else str(file_id)) + ext,
         "tag": tag,
         "size": file.size,
         "mimeType": file.content_type,

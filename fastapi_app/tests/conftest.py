@@ -89,7 +89,7 @@ def example_domains_entities(container: containers.DeclarativeContainer) -> Dict
         },
         {
             "id": 3,
-            "name": "3",
+            "name": "3.jpg",
             "tag": "important",
             "size": 2048,
             "mimeType": "image/jpeg",
