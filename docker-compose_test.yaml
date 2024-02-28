@@ -16,8 +16,7 @@ services:
       - sh
       - -c
       - |
-        alembic -c /my_project/fastapi_app/alembic.ini upgrade head
-        pytest -v /fastapi_app/
+        pytest -v --asyncio-mode=auto ./tests/
 
   db:
     image: postgres:14.0-alpine
@@ -26,7 +25,7 @@ services:
     ports:
       - 5433:5432
     healthcheck:
-      test: [ "CMD", "pg_isready", "-q", "-d", "storage_db", "-U", "storage_user" ]
+      test: [ "CMD", "pg_isready", "-q", "-d", "storage_test_db", "-U", "storage_user" ]
     networks:
       - semyon-network
 

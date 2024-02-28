@@ -24,10 +24,10 @@ from fastapi_app.src.file_storage.exceptions import (
 from fastapi_app.src.manager import ServiceManager
 from fastapi_app.src.schemas import FileMetadata, Message
 
-router = APIRouter(prefix="/v1", tags=["file_storage"])
+router = APIRouter(prefix="/api/v1", tags=["file_storage"])
 
 
-@router.post("/api/upload", status_code=status.HTTP_201_CREATED)
+@router.post("/upload", status_code=status.HTTP_201_CREATED)
 @inject
 async def create_update_file_handler(
     file_metadata: FileMetadata = Depends(valid_file_metadata),
@@ -70,7 +70,7 @@ async def create_update_file_handler(
         raise HTTPException(status_code=500, detail="Error is on the controller layer")
 
 
-@router.get("/api/get", status_code=status.HTTP_200_OK)
+@router.get("/get", status_code=status.HTTP_200_OK)
 @cache(expire=60)
 @inject
 async def get_files_info_handler(
@@ -100,7 +100,7 @@ async def get_files_info_handler(
 
 
 @router.delete(
-    "/api/delete",
+    "/delete",
     responses={
         status.HTTP_200_OK: {"model": Message},
         status.HTTP_400_BAD_REQUEST: {"model": Message},
@@ -150,7 +150,7 @@ async def delete_files_handler(
 
 
 @router.get(
-    "/api/download",
+    "/download",
     responses={
         status.HTTP_404_NOT_FOUND: {"model": Message},
     },

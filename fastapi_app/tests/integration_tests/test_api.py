@@ -7,7 +7,7 @@ from httpx import AsyncClient
 @pytest.mark.usefixtures("test_storage_dir")
 @pytest.mark.usefixtures("database_with_data")
 class TestCreateUpdateEndpoint:
-    _url = "v1/api/upload"
+    _url = "api/v1/upload"
 
     @pytest.mark.parametrize(
         argnames="file_id, name, tag, file",
@@ -21,7 +21,7 @@ class TestCreateUpdateEndpoint:
     ):
         _, ext = os.path.splitext(file[0])
         response_empty = await async_client.get(
-            url="v1/api/get",
+            url="api/v1/get",
             params={
                 "file_id": [
                     file_id,
@@ -73,7 +73,7 @@ class TestCreateUpdateEndpoint:
     ):
         _, ext = os.path.splitext(file[0])
         response_exist = await async_client.get(
-            url="v1/api/get",
+            url="api/v1/get",
             params={
                 "file_id": [
                     file_id,
@@ -130,7 +130,7 @@ class TestCreateUpdateEndpoint:
 @pytest.mark.usefixtures("test_storage_dir")
 @pytest.mark.usefixtures("database_with_data")
 class TestGetFilesInfoEndpoint:
-    _url = "v1/api/get"
+    _url = "api/v1/get"
 
     @pytest.mark.parametrize(
         argnames="file_id, name, tag, limit, offset, result_ids",
@@ -212,7 +212,7 @@ class TestGetFilesInfoEndpoint:
 @pytest.mark.usefixtures("test_storage_dir")
 @pytest.mark.usefixtures("database_with_data")
 class TestDeleteFilesEndpoint:
-    _url = "v1/api/delete"
+    _url = "api/v1/delete"
 
     @pytest.mark.parametrize(
         argnames="file_id, name, tag, num_deleted",
@@ -243,13 +243,13 @@ class TestDeleteFilesEndpoint:
 @pytest.mark.usefixtures("test_storage_dir")
 @pytest.mark.usefixtures("database_with_data")
 class TestDownloadFileEndpoint:
-    _url = "v1/api/download"
+    _url = "api/v1/download"
 
     async def test_successful_download_file(
         self, async_client: AsyncClient, test_storage_dir
     ):
         response_post = await async_client.post(
-            url="v1/api/upload",
+            url="api/v1/upload",
             files={"file": ("test_delete.txt", b"New Hello, World!")},
             params={"file_id": 1, "name": "test_delete"},
         )

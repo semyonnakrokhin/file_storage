@@ -1,6 +1,6 @@
 [./fastapi_app/.env]
 MODE=DEV
-DB_HOST=localhost
+DB_HOST=db
 DB_PORT=5432
 DB_USER=storage_user
 DB_PASS=qwerty
@@ -9,7 +9,7 @@ DB_NAME=storage_db
 
 [./fastapi_app/.env.test]
 MODE=TEST
-DB_HOST=localhost
+DB_HOST=db
 DB_PORT=5432
 DB_USER=storage_user
 DB_PASS=qwerty
