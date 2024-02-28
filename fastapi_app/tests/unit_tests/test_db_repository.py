@@ -30,7 +30,7 @@ class TestRepositoryInsertOne:
 
     file_metadata_3 = FileMetadata(
         id=3,
-        name="3",
+        name="3.jpg",
         tag=None,
         size=2048,
         mimeType="image/jpeg",
@@ -314,7 +314,7 @@ class TestRepositorySelectSome:
             (
                 {
                     "id": None,
-                    "name": ["3", "file4.pdf"],
+                    "name": ["3", "file4"],
                     "tag": None,
                 },
                 None,
@@ -348,7 +348,7 @@ class TestRepositorySelectSome:
                 {
                     "id": [1, 2, 3, 4],
                     "tag": ["important"],
-                    "name": ["file1.txt", "file2.docx", "lalala"],
+                    "name": ["file1", "file2", "lalala"],
                 },
                 None,
                 None,
@@ -505,7 +505,7 @@ class TestRepositoryDeleteSome:
                 {
                     "id": [1, 2, 3, 4],
                     "tag": ["important"],
-                    "name": ["file1.txt", "file2.docx", "lalala"],
+                    "name": ["file1", "file2", "lalala"],
                 },
                 None,
                 None,
@@ -578,7 +578,7 @@ class TestRepositoryDeleteSome:
             ),
             (
                 {
-                    "name": ["3", "file4.pdf"],
+                    "name": ["3", "file4"],
                 },
                 None,
                 None,

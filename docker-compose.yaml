@@ -1,15 +1,27 @@
 version: '3.8'
 
 services:
+  nginx:
+    build: ./nginx
+    ports:
+      - 1337:80
+    depends_on:
+      - fastapi_app
+    networks:
+      - semyon-network
+
   fastapi_app:
     build: ./fastapi_app
     env_file:
       - ./fastapi_app/.env
+      - ./fastapi_app/.env.redis
     volumes:
       - storage_volume:/my_project/fastapi_app/storage
-    depends_on:
-      db:
-        condition: service_healthy
+    depends_on: ["db", "cache", "redis-commander"]
+#      db:
+#        condition: service_healthy
+#      cache:
+#      redis-commander:
     ports:
       - 8000:8000
     networks:
@@ -20,6 +32,7 @@ services:
       - |
         alembic -c /my_project/fastapi_app/alembic.ini upgrade head
         uvicorn fastapi_app.src.main:app --reload --host 0.0.0.0 --port 8000
+#        gunicorn -w 4 -b 0.0.0.0:8000 fastapi_app.src.main:app
 
   db:
     image: postgres:14.0-alpine
@@ -31,6 +44,28 @@ services:
       - 5433:5432
     healthcheck:
       test: [ "CMD", "pg_isready", "-q", "-d", "storage_db", "-U", "storage_user" ]
+    networks:
+      - semyon-network
+
+  cache:
+    image: redis:6.2-alpine
+    restart: always
+    ports:
+      - 6379:6379
+    networks:
+      - semyon-network
+
+  redis-commander:
+    container_name: redis-commander
+    hostname: redis-commander
+    image: ghcr.io/joeferner/redis-commander:latest
+    restart: always
+    depends_on:
+      - cache
+    environment:
+      - REDIS_HOSTS=local:cache:6379
+    ports:
+      - "8081:8081"
     networks:
       - semyon-network
 

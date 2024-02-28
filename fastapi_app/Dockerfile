@@ -48,7 +48,7 @@ COPY ./storage/ ./storage/
 COPY ./tests/ ./tests/
 COPY ./alembic.ini ./alembic.ini
 COPY ./logging_config.py ./logging_config.py
-COPY ./pytest.ini ./pytest.ini
+# COPY ./pytest.ini ./pytest.ini
 
 
 # chown all the files to the app user

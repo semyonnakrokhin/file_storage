@@ -189,7 +189,13 @@ class OrmAlchemyRepository(AbstractDatabaseRepository, Generic[E, D]):
                 logger.error(error_message)
                 raise InvalidAttributeError(error_message)
 
-            and_items.append(or_(*(attr == v for v in v_list)))
+            if k == "name":
+                or_items = []
+                for v in v_list:
+                    or_items.append(attr.like(f"{v}.%"))
+                and_items.append(or_(*or_items))
+            else:
+                and_items.append(or_(*(attr == v for v in v_list)))
 
         return and_(*and_items)
 

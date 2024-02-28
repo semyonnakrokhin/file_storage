@@ -27,13 +27,6 @@ class TestGetFilePath:
         argvalues=[
             (1, "test_file_1.txt", b"Hello, World!", "text/plain", does_not_raise()),
             (2, "test_file_2.txt", b"Hello, World 2!", "text/plain", does_not_raise()),
-            (
-                3,
-                "test_file_3.txt",
-                b"Hello, World 3!",
-                "unknown/mimetype",
-                pytest.raises(ValueError),
-            ),
         ],
     )
     def test_file_path_generated_successfully(
@@ -50,8 +43,7 @@ class TestGetFilePath:
         with open(file_path_expected, "wb") as f:
             f.write(file_content)
 
-        file_name, _ = os.path.splitext(file_name_ext)
-        file_metadata = FileMetadata(id=file_id, name=file_name, mimeType=mime_type)
+        file_metadata = FileMetadata(id=file_id, name=file_name_ext, mimeType=mime_type)
 
         with expectation:
             file_path = disk_repository_test._DiskRepository__get_file_path(
@@ -93,8 +85,7 @@ class TestValidateFileDoesNotExist:
         with open(file_path_expected, "wb") as f:
             f.write(file_content)
 
-        file_name, _ = os.path.splitext(file_name_ext)
-        file_metadata = FileMetadata(id=file_id, name=file_name, mimeType=mime_type)
+        file_metadata = FileMetadata(id=file_id, name=file_name_ext, mimeType=mime_type)
 
         with pytest.raises(FileAlreadyExistsError):
             disk_repository_test._DiskRepository__validate_file_does_not_exist(
@@ -124,8 +115,7 @@ class TestWriteFile:
         expectation,
     ):
         file_path_expected = os.path.join(test_storage_dir, file_name_ext)
-        file_name, _ = os.path.splitext(file_name_ext)
-        file_metadata = FileMetadata(id=file_id, name=file_name, mimeType=mime_type)
+        file_metadata = FileMetadata(id=file_id, name=file_name_ext, mimeType=mime_type)
         file = UploadFile(filename="example.txt", file=io.BytesIO(file_content))
 
         with expectation:
@@ -158,15 +148,14 @@ class TestReadFile:
         with open(file_path_expected, "wb") as f:
             f.write(file_content)
 
-        file_name, _ = os.path.splitext(file_name_ext)
-        file_metadata = FileMetadata(id=file_id, name=file_name, mimeType=mime_type)
+        file_metadata = FileMetadata(id=file_id, name=file_name_ext, mimeType=mime_type)
 
         with expectation:
             payload = disk_repository_test.read_file(domain_obj=file_metadata)
 
             assert payload["path"] == file_path_expected
             assert payload["media_type"] == mime_type
-            assert payload["filename"] == file_name
+            assert payload["filename"] == file_name_ext
 
         if file_path_expected:
             os.remove(file_path_expected)

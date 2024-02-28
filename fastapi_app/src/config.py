@@ -37,7 +37,7 @@ class DatabaseSettings(BaseSettings):
 
 class RedisSettings(BaseSettings):
     model_config = SettingsConfigDict(
-        env_file=os.path.join(_root_dir, os.pardir, ".env.redis"), extra="allow"
+        env_file=os.path.join(_root_dir, ".env.redis"), extra="allow"
     )
 
     redis_host: str
@@ -50,7 +50,7 @@ class RedisSettings(BaseSettings):
 
     @property
     def redis_url(self) -> str:
-        return f"redis" f"://{self.redis_host}" f":{self.redis_port}/{self.redis_db}"
+        return f"redis://{self.redis_host}:{self.redis_port}/{self.redis_db}"
 
 
 def merge_dicts(*dicts: Dict) -> Dict:

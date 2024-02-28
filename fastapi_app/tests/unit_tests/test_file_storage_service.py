@@ -45,7 +45,7 @@ class TestFileStorageServiceSave:
 
     @pytest.mark.parametrize(
         argnames="error_type",
-        argvalues=[ValueError, FileAlreadyExistsError, FileWriteError],
+        argvalues=[FileAlreadyExistsError, FileWriteError],
     )
     async def test_add_file_raising_errors(self, container, error_type):
         repository_mock = mock.Mock(spec=DiskRepository)

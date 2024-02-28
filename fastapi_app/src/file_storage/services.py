@@ -23,7 +23,7 @@ class FileStorageService:
     def get_file(self, domain_obj: FileMetadata) -> Dict:
         try:
             return self._file_repository.read_file(domain_obj=domain_obj)
-        except (ValueError, FileNotFoundError, FileReadError) as e:
+        except (FileNotFoundError, FileReadError) as e:
             raise e
         except Exception as e:
             error_message = (
@@ -37,7 +37,7 @@ class FileStorageService:
     async def save_file(self, file: UploadFile, domain_obj: FileMetadata) -> None:
         try:
             await self._file_repository.write_file(file=file, domain_obj=domain_obj)
-        except (ValueError, FileAlreadyExistsError, FileWriteError) as e:
+        except (FileAlreadyExistsError, FileWriteError) as e:
             raise e
         except Exception as e:
             error_message = (
@@ -58,7 +58,6 @@ class FileStorageService:
             self._file_repository.delete_file(domain_obj=domain_obj_old)
             await self._file_repository.write_file(file=file, domain_obj=domain_obj_new)
         except (
-            ValueError,
             FileAlreadyExistsError,
             FileWriteError,
             FileDeletionError,
@@ -76,7 +75,7 @@ class FileStorageService:
     def remove_file(self, domain_obj: FileMetadata) -> None:
         try:
             self._file_repository.delete_file(domain_obj=domain_obj)
-        except (ValueError, FileDeletionError) as e:
+        except FileDeletionError as e:
             raise e
         except Exception as e:
             error_message = (

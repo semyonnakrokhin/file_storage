@@ -19,6 +19,7 @@ class TestCreateUpdateEndpoint:
     async def test_successful_file_add(
         self, async_client: AsyncClient, file_id, name, tag, file, test_storage_dir
     ):
+        _, ext = os.path.splitext(file[0])
         response_empty = await async_client.get(
             url="v1/api/get",
             params={
@@ -47,7 +48,7 @@ class TestCreateUpdateEndpoint:
         data = response.json()
         assert len(data) == 6
         assert data["id"] == file_id
-        assert data["name"] == name
+        assert data["name"] == name + ext
         assert data["tag"] == tag
 
         _, ext = os.path.splitext(file[0])
@@ -70,6 +71,7 @@ class TestCreateUpdateEndpoint:
     async def test_successful_file_update(
         self, async_client: AsyncClient, file_id, name, tag, file, test_storage_dir
     ):
+        _, ext = os.path.splitext(file[0])
         response_exist = await async_client.get(
             url="v1/api/get",
             params={
@@ -94,7 +96,7 @@ class TestCreateUpdateEndpoint:
         data = response.json()
         assert len(data) == 6
         assert data["id"] == file_id
-        assert data["name"] == name
+        assert data["name"] == name + ext
         assert data["tag"] == tag
 
         _, ext = os.path.splitext(file[0])
